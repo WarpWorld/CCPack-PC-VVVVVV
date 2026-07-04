@@ -5,6 +5,7 @@
 #endif
 
 #include "ButtonGlyphs.h"
+#include "CrowdControl.h"
 #include "CustomLevels.h"
 #include "DeferCallbacks.h"
 #include "Editor.h"
@@ -626,6 +627,8 @@ int main(int argc, char *argv[])
 
     NETWORK_init();
 
+    cc::init();
+
     vlog_info("\t\t");
     vlog_info("\t\t");
     vlog_info("\t\t       VVVVVV");
@@ -894,6 +897,8 @@ int main(int argc, char *argv[])
 static void cleanup(void)
 {
     /* Order matters! */
+    cc::revert_all();
+
     if (FILESYSTEM_isInit()) /* not necessary but silences logs */
     {
         game.savestatsandsettings();
@@ -907,6 +912,7 @@ static void cleanup(void)
     gameScreen.destroy();
     music.destroy();
     map.destroy();
+    cc::shutdown();
     NETWORK_shutdown();
     loc::resettext(true);
     SDL_Quit();
@@ -980,6 +986,8 @@ static enum LoopCode loop_begin(void)
 
     // Update network per frame.
     NETWORK_update();
+
+    cc::update();
 
     return Loop_continue;
 }

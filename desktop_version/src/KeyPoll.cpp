@@ -6,6 +6,7 @@
 #include "Alloc.h"
 #include "ButtonGlyphs.h"
 #include "Constants.h"
+#include "CrowdControl.h"
 #include "Editor.h"
 #include "Exit.h"
 #include "Game.h"
@@ -282,6 +283,14 @@ void KeyPoll::Poll(void)
                 game.old_screenshot_border_timer = 255;
                 game.screenshot_border_timer = 255;
                 game.screenshot_saved_success = success;
+            }
+
+            /* Retry the Crowd Control connection.
+             * The editor uses F9 for reloading resources, so not there. */
+            if (evt.key.keysym.sym == SDLK_F9 && !evt.key.repeat
+            && game.gamestate != EDITORMODE)
+            {
+                cc::request_connect();
             }
 
             BUTTONGLYPHS_keyboard_set_active(true);
