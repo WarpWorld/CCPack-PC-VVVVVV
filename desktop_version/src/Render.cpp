@@ -4,6 +4,7 @@
 #include "ButtonGlyphs.h"
 #include "Constants.h"
 #include "Credits.h"
+#include "CrowdControl.h"
 #include "CustomLevels.h"
 #include "Editor.h"
 #include "Entity.h"
@@ -343,11 +344,29 @@ static void menurender(void)
         }
         else if (game.currentmenuoption == gameplayoptionsoffset + 3)
         {
+            //Crowd Control popups
+            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Crowd Control Popup"), tr, tg, tb);
+            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Change how Crowd Control effect popups are shown."), tr, tg, tb);
+            switch (cc::get_announce_mode())
+            {
+            case cc::ANNOUNCE_WITH_VIEWER:
+                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Currently: effect and viewer name"), tr, tg, tb);
+                break;
+            case cc::ANNOUNCE_EFFECT_ONLY:
+                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Currently: effect name only"), tr, tg, tb);
+                break;
+            default:
+                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Currently: no popups"), tr/2, tg/2, tb/2);
+                break;
+            }
+        }
+        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
+        {
             //Clear Data
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Clear Data"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Delete your main game save data and unlocked play modes."), tr, tg, tb);
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 5)
         {
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Clear Data"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Delete your custom level save data and completion stars."), tr, tg, tb);
@@ -1990,6 +2009,18 @@ void titlerender(void)
         graphics.drawmenu(tr, tg, tb, game.currentmenuname);
     }
 
+    if (!game.menustart || game.currentmenuname == Menu::mainmenu)
+    {
+        if (cc::is_connected())
+        {
+            font::print(0, 10, 220, "Crowd Control: Connected", tr/2, tg/2, tb/2);
+        }
+        else
+        {
+            font::print(0, 10, 220, "Crowd Control: Not Connected [F9]", 255, 70, 70);
+        }
+    }
+
     graphics.drawfade();
 
     graphics.renderwithscreeneffects();
@@ -2425,6 +2456,8 @@ void gamerender(void)
         {
             graphics.drawtowerspikes();
         }
+
+        cc::draw_lights_out();
     }
 
     int return_editor_alpha = 0;

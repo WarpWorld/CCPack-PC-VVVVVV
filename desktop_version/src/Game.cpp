@@ -8,6 +8,7 @@
 
 #include "ButtonGlyphs.h"
 #include "Constants.h"
+#include "CrowdControl.h"
 #include "CustomLevels.h"
 #include "DeferCallbacks.h"
 #include "Editor.h"
@@ -4816,6 +4817,11 @@ void Game::deserializesettings(tinyxml2::XMLElement* dataNode, struct ScreenSett
             slowdown = help.Int(pText);
         }
 
+        if (SDL_strcmp(pKey, "cc_announce") == 0)
+        {
+            cc::set_announce_mode(help.Int(pText));
+        }
+
         if (SDL_strcmp(pKey, "advanced_smoothing") == 0)
         {
             screen_settings->badSignal = help.Int(pText);
@@ -5122,9 +5128,12 @@ void Game::serializesettings(tinyxml2::XMLElement* dataNode, const struct Screen
 
     xml::update_tag(dataNode, "setflipmode", graphics.setflipmode);
 
-    xml::update_tag(dataNode, "invincibility", map.invincibility);
+    /* Don't persist the Crowd Control effects to the settings file. */
+    xml::update_tag(dataNode, "invincibility", cc::real_invincibility());
 
-    xml::update_tag(dataNode, "slowdown", slowdown);
+    xml::update_tag(dataNode, "slowdown", cc::real_slowdown());
+
+    xml::update_tag(dataNode, "cc_announce", cc::get_announce_mode());
 
 
     xml::update_tag(dataNode, "advanced_smoothing", (int) screen_settings->badSignal);
@@ -6860,6 +6869,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         option(loc::gettext("toggle fps"));
         option(loc::gettext("speedrun options"));
         option(loc::gettext("advanced options"));
+        option(loc::gettext("crowd control alerts"));
         option(loc::gettext("clear main game data"));
         option(loc::gettext("clear custom level data"));
         option(loc::gettext("return"));
@@ -7975,6 +7985,8 @@ static inline int get_framerate(const int slowdown, const int deathseq)
         return 55;
     case 12:
         return 83;
+    case 40: /* Crowd Control "Fast Motion" effect */
+        return 22;
     }
 
     return 34;

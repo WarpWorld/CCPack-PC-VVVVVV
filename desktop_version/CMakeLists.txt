@@ -75,6 +75,7 @@ set(VVV_CXX_SRC
     src/BinaryBlob.cpp
     src/BlockV.cpp
     src/ButtonGlyphs.cpp
+    src/CrowdControl.cpp
     src/CustomLevels.cpp
     src/CWrappers.cpp
     src/Editor.cpp
@@ -242,6 +243,7 @@ endif()
 set(PNG_SRC src/lodepng_wrapper.c)
 set(PNG_DEF -DLODEPNG_NO_COMPILE_ALLOCATORS -DLODEPNG_NO_COMPILE_DISK)
 set(CHM_SRC ../third_party/c-hashmap/map.c)
+set(CJSON_SRC ../third_party/cJSON/cJSON.c)
 set(SBIDI_SRC ../third_party/SheenBidi/Source/SheenBidi.c)
 
 if(NOT OFFICIAL_BUILD)
@@ -340,9 +342,12 @@ else()
     # Dependencies (as needed)
     set_source_files_properties(${FAUDIO_SRC} PROPERTIES COMPILE_FLAGS -std=c99)
     set_source_files_properties(${CHM_SRC} PROPERTIES COMPILE_FLAGS -std=c99)
+    set_source_files_properties(${CJSON_SRC} PROPERTIES COMPILE_FLAGS -std=c99)
 endif()
 
 add_library(c-hashmap-static STATIC ${CHM_SRC})
+
+add_library(cjson-static STATIC ${CJSON_SRC})
 
 add_library(sheenbidi-static STATIC ${SBIDI_SRC})
 
@@ -354,9 +359,9 @@ target_include_directories(sheenbidi-static PRIVATE
 )
 
 if(BUNDLE_DEPENDENCIES)
-    list(APPEND STATIC_LIBRARIES lodepng-static physfs-static tinyxml2-static c-hashmap-static faudio-static sheenbidi-static)
+    list(APPEND STATIC_LIBRARIES lodepng-static physfs-static tinyxml2-static c-hashmap-static faudio-static sheenbidi-static cjson-static)
 else()
-    list(APPEND STATIC_LIBRARIES c-hashmap-static sheenbidi-static)
+    list(APPEND STATIC_LIBRARIES c-hashmap-static sheenbidi-static cjson-static)
 endif()
 
 if(BUNDLE_DEPENDENCIES)
@@ -382,6 +387,11 @@ else()
         -DSYSTEM_LODEPNG
     )
     target_link_libraries(VVVVVV ${STATIC_LIBRARIES} physfs tinyxml2 FAudio lodepng)
+endif()
+
+if(WIN32)
+    # Winsock, for the Crowd Control TCP client
+    target_link_libraries(VVVVVV ws2_32)
 endif()
 
 

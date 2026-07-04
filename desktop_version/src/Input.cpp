@@ -3,6 +3,7 @@
 
 #include "ButtonGlyphs.h"
 #include "Credits.h"
+#include "CrowdControl.h"
 #include "CustomLevels.h"
 #include "Editor.h"
 #include "Entity.h"
@@ -1049,18 +1050,25 @@ static void menuactionpress(void)
         }
         else if (game.currentmenuoption == gameplayoptionsoffset + 3)
         {
+            //Cycle the Crowd Control popup mode
+            music.playef(Sound_VIRIDIAN);
+            cc::set_announce_mode(cc::get_announce_mode() + 1);
+            game.savestatsandsettings_menu();
+        }
+        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
+        {
             //Clear Data
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::cleardatamenu);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 5)
         {
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::clearcustomdatamenu);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 5) {
+        else if (game.currentmenuoption == gameplayoptionsoffset + 6) {
             //return to previous menu
             music.playef(Sound_VIRIDIAN);
             game.returnmenu();
@@ -2626,6 +2634,9 @@ void gameinput(void)
         {
             game.press_right = true;
         }
+
+        cc::modify_movement_input();
+
         if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v)
                 || key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN) || key.isDown(KEYBOARD_w) || key.isDown(KEYBOARD_s)|| key.isDown(game.controllerButton_flip))
         {
@@ -2918,7 +2929,10 @@ void gameinput(void)
             }
         }
 
-        for (size_t ie = 0; ie < obj.entities.size(); ie++)
+        /* Cursed Mode turns the flip button into a (wall) jump. */
+        const bool flip_suppressed = cc::modify_flip_input();
+
+        for (size_t ie = 0; !flip_suppressed && ie < obj.entities.size(); ie++)
         {
             const bool process_flip = obj.entities[ie].rule == 0 &&
                 game.jumppressed > 0;
