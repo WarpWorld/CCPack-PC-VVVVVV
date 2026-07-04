@@ -2013,11 +2013,11 @@ void titlerender(void)
     {
         if (cc::is_connected())
         {
-            font::print(0, 10, 220, "Crowd Control: Connected", tr/2, tg/2, tb/2);
+            font::print(0, 10, 220, "CrowdControl Connected", tr/2, tg/2, tb/2);
         }
         else
         {
-            font::print(0, 10, 220, "Crowd Control: Not Connected [F9]", 255, 70, 70);
+            font::print(0, 10, 220, "CrowdControl Disconnected [F9]", 255, 70, 70);
         }
     }
 
