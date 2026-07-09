@@ -50,8 +50,11 @@ enum RequestType
     REQ_TEST = 0,
     REQ_START = 1,
     REQ_STOP = 2,
+    REQ_GAMEUPDATE = 0xFD,
     REQ_KEEPALIVE = 0xFF
 };
+
+#define RESP_GAMEUPDATE 0xFD
 
 enum EffectStatus
 {
@@ -468,6 +471,81 @@ static void respond(const Uint32 id, const int status, const Sint32 time_remaini
     cJSON_free(printed);
 }
 
+/* The Crowd Control GameState string best describing what the game is
+ * doing right now, for GameUpdate (0xFD) requests. "ready" is the only
+ * state in which effects are processed. */
+static const char* current_game_state(void)
+{
+    if (in_gameplay())
+    {
+        return "ready";
+    }
+    if (!key.isActive)
+    {
+        return "notFocused";
+    }
+    switch (game.gamestate)
+    {
+    case PRELOADER:
+        return "loading";
+    case TITLEMODE:
+    case EDITORMODE:
+        return "wrongMode";
+    case MAPMODE:
+    case TELEPORTERMODE:
+        return "paused";
+    case GAMECOMPLETE:
+    case GAMECOMPLETE2:
+        return "cutscene";
+    case GAMEMODE:
+        if (script.running || game.completestop)
+        {
+            return "cutscene";
+        }
+        if (game.deathseq != -1 || game.lifeseq != 0
+        || !INBOUNDS_VEC(obj.getplayer(), obj.entities))
+        {
+            return "badPlayerState";
+        }
+        if (game.physics_frozen())
+        {
+            return "paused";
+        }
+        break;
+    }
+    return "unknown";
+}
+
+static void respond_gamestate(const Uint32 id)
+{
+    if (!SDL_AtomicGet(&connected))
+    {
+        return;
+    }
+
+    cJSON* root = cJSON_CreateObject();
+    if (root == NULL)
+    {
+        return;
+    }
+    cJSON_AddNumberToObject(root, "id", (double) id);
+    cJSON_AddNumberToObject(root, "type", RESP_GAMEUPDATE);
+    cJSON_AddStringToObject(root, "state", current_game_state());
+
+    char* printed = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    if (printed == NULL)
+    {
+        return;
+    }
+
+    SDL_LockMutex(out_mutex);
+    outgoing.push_back(std::string(printed));
+    SDL_UnlockMutex(out_mutex);
+
+    cJSON_free(printed);
+}
+
 static void announce(const Request& req, const EffectDef* def)
 {
     char buffer[128];
@@ -583,6 +661,9 @@ static void process_request(const Request& req)
     }
     case REQ_STOP:
         stop_all(req);
+        break;
+    case REQ_GAMEUPDATE:
+        respond_gamestate(req.id);
         break;
     default:
         /* KeepAlives are dropped on the socket thread; ignore the rest. */
