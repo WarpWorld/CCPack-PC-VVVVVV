@@ -1,5 +1,12 @@
 # VVVVVV Crowd Control Build
 
+## Pack metadata
+
+- **Game:** VVVVVV
+- **Crowd Control game ID:** `VVVVVV`
+- **Connector:** `SimpleTCPServerConnector`
+- **Port:** `28379`
+
 This repository is the VVVVVV source tree with a Crowd Control TCP client
 integrated into `desktop_version`. It is not a drop-in mod for an unmodified
 commercial VVVVVV installation; use a build made from this source tree.
