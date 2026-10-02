@@ -1,23 +1,36 @@
-![logo](logo.gif "VVVVVV")
+# VVVVVV Crowd Control Build
 
-This is the source code to VVVVVV, the 2010 indie game by [Terry Cavanagh](http://distractionware.com/), with music by [Magnus Pålsson](http://souleye.madtracker.net/). You can read the [announcement](http://distractionware.com/blog/2020/01/vvvvvv-is-now-open-source/) of the source code release on Terry's blog!
+This repository is the VVVVVV source tree with a Crowd Control TCP client
+integrated into `desktop_version`. It is not a drop-in mod for an unmodified
+commercial VVVVVV installation; use a build made from this source tree.
 
-The source code for the desktop version is in [this folder](desktop_version).
+## Requirements
 
-VVVVVV is still commercially available at [thelettervsixtim.es](https://thelettervsixtim.es/) if you'd like to support it, but you are completely free to compile the game for your own personal use. If you're interested in distributing a compiled version of the game, see [LICENSE.md](LICENSE.md) for more information.
+- A desktop VVVVVV build compiled from this repository.
+- Crowd Control with the **VVVVVV** pack selected.
 
-Discussion about VVVVVV updates mainly happens on the "unofficial" [VVVVVV discord](https://discord.gg/Zf7Nzea), in the `vvvvvv-code` channel.
+`desktop_version\CMakeLists.txt` includes `src\CrowdControl.cpp`, which
+contains the game-side connector.
 
-Credits
--------
-- Created by [Terry Cavanagh](http://distractionware.com/)
-- Room Names by [Bennett Foddy](http://www.foddy.net)
-- Music by [Magnus Pålsson](https://magnuspalsson.com/)
-- Metal Soundtrack by [FamilyJules](https://link.space/@familyjules)
-- 2.0 Update (C++ Port) by [Simon Roth](http://www.machinestudios.co.uk)
-- 2.2 Update (SDL2/PhysicsFS/Steamworks port) by [Ethan Lee](http://www.flibitijibibo.com/)
-- Additional coding by [Misa Kai](https://infoteddy.info/)
-- Beta Testing by Sam Kaplan and Pauli Kohberger
-- Ending Picture by Pauli Kohberger
-- Localisations by [our localisation teams](desktop_version/TRANSLATORS.txt)
-- With additional contributions by [many others here on github](desktop_version/CONTRIBUTORS.txt) <3
+## Setup and usage
+
+1. Build the desktop version from this source tree using its CMake project.
+2. Start Crowd Control and select VVVVVV.
+3. Launch the built game. Its Crowd Control client attempts a local connection
+   automatically.
+
+The game connects to the Crowd Control server at `127.0.0.1:28379`. The
+in-game status text reports **CrowdControl Connected** or
+**CrowdControl Disconnected [F9]**.
+
+## Troubleshooting
+
+- **Disconnected status:** confirm that Crowd Control is running with the
+  VVVVVV pack and that port `28379` is free locally.
+- **The first connection fails or is lost:** press **F9** outside the editor
+  to request a reconnect.
+- **The stock game does not connect:** the connector is compiled into this
+  repository's desktop source; run the build produced from this tree.
+
+The upstream project credits, source-license information, and distribution
+terms remain in `LICENSE.md` and the original VVVVVV source files.
