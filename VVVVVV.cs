@@ -25,7 +25,7 @@ public class VVVVVV : SimpleTCPPack<SimpleTCPServerConnector>
 
 	public override Game Game => new("VVVVVV", "VVVVVV", "PC", ConnectorType.SimpleTCPServerConnector);
 
-	public override EffectList Effects => new Effect[]
+	public override EffectList Effects { get; } = new Effect[]
 	{
         // price is default cost in US cents
         // descriptions are short
